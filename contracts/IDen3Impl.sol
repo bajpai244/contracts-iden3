@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import './lib/DelegateProxySlotStorage.sol';
 import './lib/IDen3lib.sol';
@@ -14,40 +14,40 @@ contract IDen3Impl is
    IDen3lib {
 
    /// last nonce used
-   uint256 public lastNonce; 
+   uint256 public lastNonce;
 
-   /** 
+   /**
    * @dev IDen3Impl instance is used only as base code for IDen3DelegateProxy calls,
    *      so, disable its usage by setting all storage to zero ; this is some
    *      boilerplate at this moment but it is only done one time
    */
    constructor()
-   IDen3SlotStorage(0x0,0x0)
+   IDen3SlotStorage(0x0000000000000000000000000000000000000000, 0x0000000000000000000000000000000000000000)
    public {
-       setProxyImpl(0x0);
-       setProxyRecoverer(0x0);
-       setProxyRecovererProp(0x0);
+       setProxyImpl(0x0000000000000000000000000000000000000000);
+       setProxyRecoverer(0x0000000000000000000000000000000000000000);
+       setProxyRecovererProp(0x0000000000000000000000000000000000000000);
    }
 
-   /** 
+   /**
    * @dev returns if the identity has been revokated
    * @return true if revocated
    */
    function revokated() public view returns(bool) {
-       return getRelay()==0x0;
+       return getRelay() == 0x0000000000000000000000000000000000000000;
    }
 
-   /** 
+   /**
    * @dev revoke (disable) the identity by setting the relayer to zero
    */
    function revoke() public {
         (,address recovery,) = getProxyInfo();
         address revoker = getRevoker();
         require (msg.sender == recovery || msg.sender == revoker,"errInvalidRevoker");
-        setRelay(0x0);
+        setRelay(0x0000000000000000000000000000000000000000);
    }
 
-   /** 
+   /**
    * @dev change the relayer, this can only be done by recoverer
    * @param _relayer to be used
    */
@@ -57,11 +57,11 @@ contract IDen3Impl is
         setRelay(_relayer);
    }
 
-   /** 
+   /**
    * @dev returns information about this identity
    */
    function info() public view returns (
-       address impl, 
+       address impl,
        address recoverer,
        address recovererprop,
        address revoker,
@@ -70,34 +70,33 @@ contract IDen3Impl is
         (impl, recoverer, recovererprop) = getProxyInfo();
         revoker = getRevoker();
         relay = getRelay();
-        return;
    }
 
-   /** 
+   /**
    * @dev checks if the authorization claims are correct
    */
    function mustVerifyAuth(
        address _caller,
-       bytes   _auth
-  ) view internal {
-       
+       bytes memory _auth
+  ) internal view {
+
        Memory.Cursor memory c = Memory.read(_auth);
-      
+
        // 1. verify ksignclaim  --------------------------------------------------
-       
+
        // check if unpacks ok, and if the caller is the key contained in the claim
        (bool kok, KSignClaim memory kclaim) = unpackKSignClaim(c.readBytes());
        require(kok,"errUnpackKclaim");
        require(_caller==kclaim.key,"errCallerMismatch");
-       
+
        // check the valid date range of the claim
        require(now >= kclaim.validFrom, "errBeforeValidFrom");
-       require(now <= kclaim.validUntil, "errAfterValidUntil"); 
+       require(now <= kclaim.validUntil, "errAfterValidUntil");
 
        // check if is an operational key
-       require(kclaim.appid==0x0 && kclaim.authz==0x0,"errNotOperational"); 
+       require(kclaim.appid == 0x0 && kclaim.authz == 0x0,"errNotOperational");
 
-       // check the merkle proofs of existence and last_claim 
+       // check the merkle proofs of existence and last_claim
        bytes32 kclaimRoot = c.readBytes32();
        require(checkProof(kclaimRoot,c.readBytes(),kclaim.hi,kclaim.ht,140),"errKproof");
        require(checkProof(kclaimRoot,c.readBytes(),kclaim.hin,0x0,140),"errKproofN");
@@ -108,12 +107,12 @@ contract IDen3Impl is
        (bool rok, SetRootClaim memory rclaim) = unpackSetRootClaim(c.readBytes());
        require(rok,"errUnpackRclaim");
        require(rclaim.root == kclaimRoot,"errKRoot");
- 
-       // check the merkle proofs of existence and last_claim 
+
+       // check the merkle proofs of existence and last_claim
        bytes32 rclaimRoot = c.readBytes32();
        require(checkProof(rclaimRoot,c.readBytes(),rclaim.hi,rclaim.ht,140),"errRproof");
        require(checkProof(rclaimRoot,c.readBytes(),rclaim.hin,0x0,140),"errRproofN");
-       
+
        uint64  rclaimSigDate = c.readUint64();
        bytes   memory rclaimSig = c.readBytes();
 
@@ -121,8 +120,8 @@ contract IDen3Impl is
 
        // check the signature is done by the relayer
        address signer = ecrecover2(
-           keccak256(rclaimRoot,rclaimSigDate),
-           rclaimSig
+           keccak256(abi.encodePacked(rclaimRoot,rclaimSigDate),
+           rclaimSig)
        );
 
        require(signer == getRelay(),"errInvalidRelay");
@@ -131,7 +130,7 @@ contract IDen3Impl is
        require(now < rclaimSigDate + 3600,"errNotFreshSig");
    }
 
-   /** 
+   /**
    * @dev call to another contract using this contract identity
    * @param _to  is the destination
    * @param _data to send (msg.data)
@@ -141,36 +140,36 @@ contract IDen3Impl is
    * @param _auth are the claims + proofs of the KSign
    */
    function forward(
-       address _to,    
-       bytes   _data, 
-       uint256 _value, 
-       uint256 _gas, 
-       bytes   _sig,
-       bytes   _auth
+       address _to,
+       bytes memory _data,
+       uint256 _value,
+       uint256 _gas,
+       bytes memory _sig,
+       bytes memory _auth
    ) public {
 
        // check the relayer has not been revokated
        require(!revokated(),"errRevokated");
-        
+
        // avoid reply attacks
        lastNonce++;
 
        // EIP191 compliant 0x19 0x00
-       bytes32 hash=keccak256(
+       bytes32 hash = keccak256(abi.encodePacked(
           byte(0x19),byte(0),
           this,lastNonce,
-          _to,_data, _value, _gas
+          _to,_data, _value, _gas)
        );
-    
-       // get the signature
-       address signer=IDen3lib.ecrecover2(hash,_sig);
 
-       // and verify if the signer has valid claims 
-       mustVerifyAuth(signer,_auth);
+       // get the signature
+       address signer = IDen3lib.ecrecover2(hash, _sig);
+
+       // and verify if the signer has valid claims
+       mustVerifyAuth(signer, _auth);
 
        // forward the call
        require(_to.call.gas(_gas).value(_value)(_data),"errFailCall");
    }
-   
+
 }
 

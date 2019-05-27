@@ -4,7 +4,7 @@
 * @dev SPDX-License-Identitifer: MIT
 */
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 library UnstructuredStorage {
     function getStorageBool(bytes32 position) internal view returns (bool data) {

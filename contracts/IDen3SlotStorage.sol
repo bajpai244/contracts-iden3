@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import './lib/UnstructuredStorage.sol';
 
@@ -24,7 +24,7 @@ contract IDen3SlotStorage {
     * @return the address
     */
     function getRelay() internal view returns (address relay) {
-        return RELAY_SLOT.getStorageAddress();        
+        return RELAY_SLOT.getStorageAddress();
     }
 
     /**
@@ -39,8 +39,8 @@ contract IDen3SlotStorage {
     * @dev returns the revoker
     * @return the address
     */
-    function getRevoker() internal view returns (address revoke) {        
-        return REVOKER_SLOT.getStorageAddress();        
+    function getRevoker() internal view returns (address revoke) {
+        return REVOKER_SLOT.getStorageAddress();
     }
 
     /**
@@ -48,6 +48,6 @@ contract IDen3SlotStorage {
     * @return _address of the revoker
     */
     function setRevoker(address _address) internal {
-        return REVOKER_SLOT.setStorageAddress(_address);        
+        return REVOKER_SLOT.setStorageAddress(_address);
     }
 }

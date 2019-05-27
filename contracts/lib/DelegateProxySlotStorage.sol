@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import './UnstructuredStorage.sol';
 
@@ -17,7 +17,7 @@ contract DelegateProxySlotStorage {
     bytes32 constant private PROPOSED_SLOT = 0x9e67005d2760c1e41a2ea81ffa69f265791c0630cb5295c10534812389883dc4;
 
     /**
-    * @dev returns information about the proxy state 
+    * @dev returns information about the proxy state
     * @return impl is the address of the code to be called
     * @return recoverer is the address authorized to recover the identity
     * @return proposed is the address proposed to be the replacement for recover

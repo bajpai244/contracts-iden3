@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 /*
 * not finished
@@ -17,59 +17,60 @@ contract RootCommits {
   event RootUpdated(address addr, uint64 blockN, uint64 timestamp, bytes32 root);
 
   function setRoot(bytes32 _root) public {
-      if(identities[msg.sender].length>0){
-        require(identities[msg.sender][identities[msg.sender].length-1].BlockN!=block.number, "no multiple set in the same block");
+      if(identities[msg.sender].length > 0){
+        require(identities[msg.sender][identities[msg.sender].length - 1].BlockN != block.number, "no multiple set in the same block");
       }
       identities[msg.sender].push(MRoot(uint64(block.number), uint64(block.timestamp), _root));
       emit RootUpdated(msg.sender, uint64(block.number), uint64(block.timestamp), _root);
   }
 
   function getRoot(address _address) public view returns (bytes32){
-      return identities[_address][identities[_address].length-1].Root;
+      require(identities[_address].length != 0, "No roots commited");
+      return identities[_address][identities[_address].length - 1].Root;
   }
 
   /*
   * binary search
   */
   function getRootByBlock(address _address, uint64 _blockN) public view returns (bytes32) {
-      require(_blockN<block.number, "errNoFutureAllowed");
+      require(_blockN < block.number, "errNoFutureAllowed");
       uint min = 0;
-      uint max = identities[_address].length-1;
-      while(min<=max) {
-          uint mid = (max + min)/ 2;
-          if(identities[_address][mid].BlockN==_blockN) {
+      uint max = identities[_address].length - 1;
+      while(min <= max) {
+          uint mid = (max + min) / 2;
+          if(identities[_address][mid].BlockN == _blockN) {
               return identities[_address][mid].Root;
-          } else if((_blockN>identities[_address][mid].BlockN) && (_blockN<identities[_address][mid+1].BlockN)) {
+          } else if((_blockN > identities[_address][mid].BlockN) && (_blockN < identities[_address][mid + 1].BlockN)) {
               return identities[_address][mid].Root;
-          } else if(_blockN>identities[_address][mid].BlockN) {
+          } else if(_blockN > identities[_address][mid].BlockN) {
               min = mid + 1;
           } else {
-              max = mid -1;
+              max = mid - 1;
           }
       }
-      return;
+      return 0;
   }
   function getRootByTime(address _address, uint64 _timestamp) public view returns (bytes32) {
-      require(_timestamp<block.timestamp, "errNoFutureAllowed");
+      require(_timestamp < block.timestamp, "errNoFutureAllowed");
       if(identities[_address].length==0) {
         bytes32 emptyRoot;
         return emptyRoot;
       }
       uint min = 0;
-      uint max = identities[_address].length-1;
-      while(min<=max) {
-          uint mid = (max + min)/ 2;
-          if(identities[_address][mid].BlockTimestamp==_timestamp) {
+      uint max = identities[_address].length - 1;
+      while(min <= max) {
+          uint mid = (max + min) / 2;
+          if(identities[_address][mid].BlockTimestamp == _timestamp) {
               return identities[_address][mid].Root;
-          } else if((_timestamp>identities[_address][mid].BlockTimestamp) && (_timestamp<identities[_address][mid+1].BlockTimestamp)) {
+          } else if((_timestamp > identities[_address][mid].BlockTimestamp) && (_timestamp < identities[_address][mid + 1].BlockTimestamp)) {
               return identities[_address][mid].Root;
-          } else if(_timestamp>identities[_address][mid].BlockTimestamp) {
+          } else if(_timestamp > identities[_address][mid].BlockTimestamp) {
               min = mid + 1;
           } else {
-              max = mid -1;
+              max = mid - 1;
           }
       }
-      return;
+      return 0;
   }
 
 }
