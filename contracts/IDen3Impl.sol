@@ -119,10 +119,7 @@ contract IDen3Impl is
        require(c.eof(),"errStreamTooLarge");
 
        // check the signature is done by the relayer
-       address signer = ecrecover2(
-           keccak256(abi.encodePacked(rclaimRoot,rclaimSigDate),
-           rclaimSig)
-       );
+       address signer = ecrecover2(keccak256(abi.encodePacked(rclaimRoot,rclaimSigDate)),rclaimSig);
 
        require(signer == getRelay(),"errInvalidRelay");
 
@@ -168,7 +165,9 @@ contract IDen3Impl is
        mustVerifyAuth(signer, _auth);
 
        // forward the call
-       require(_to.call.gas(_gas).value(_value)(_data),"errFailCall");
+       // require(_to.call.gas(_gas).value(_value)(_data),"errFailCall");
+       (bool flag, ) = _to.call.gas(_gas).value(_value)(_data);
+       require(flag,'errFailCall');
    }
 
 }

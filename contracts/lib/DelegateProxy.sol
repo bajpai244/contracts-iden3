@@ -83,7 +83,7 @@ contract DelegateProxy is DelegateProxySlotStorage {
             ( , ,address proposed) = getProxyInfo();
             require(proposed == msg.sender);
             setProxyRecoverer(msg.sender);
-            setProxyRecovererProp(0x0);
+            setProxyRecovererProp(0x0000000000000000000000000000000000000000);
         }
     }
 
