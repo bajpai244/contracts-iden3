@@ -1,4 +1,4 @@
-// The code of this file (Ec.sol) is done by @jbaylina from https://github.com/jbaylina/ecsol/blob/master/ec.sol
+// The code of this file (EcArithmetic.sol) is done by @jbaylina from https://github.com/jbaylina/ecsol/blob/master/ec.sol
 // and slightly modified to adapt it to the BabyJubJub curve
 
 pragma solidity ^0.5.0;
