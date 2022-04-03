@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.6.0;
+pragma solidity 0.8.2;
 
 /**
  * @title Schema
@@ -12,9 +12,11 @@ contract SchemaUrlRegistry {
         string credentialType;
         string url;
         uint256 timestamp;
+        string desc;
     }
 
     mapping(bytes32 => Schema) public schemaMap;
+    bytes32[] ids;
 
     /**
      * @dev save is function to store schema
@@ -22,7 +24,7 @@ contract SchemaUrlRegistry {
      * @param credentialType - schema credential type
      * @param url - schema uri
      */
-    function save(bytes32 id, string memory credentialType, string memory url) public {
+    function save(bytes32 id, string memory credentialType, string memory url, string memory desc) public {
         require(schemaMap[id].creator != address(0), "Schema already exists");
 
         Schema memory s = Schema({// creating new schema
@@ -30,10 +32,16 @@ contract SchemaUrlRegistry {
         id : id,
         credentialType : credentialType,
         timestamp : block.timestamp,
-        url : url
+        url : url,
+        desc: desc
         });
 
         schemaMap[id] = s;
+        ids.push(id);
+    }
+
+    function getIds() public view returns(bytes32[] memory){
+        return ids;
     }
 
     /**
@@ -43,8 +51,8 @@ contract SchemaUrlRegistry {
     function getSchemaById(bytes32 id)
     public
     view
-    returns (bytes32, string memory, string memory, address, uint256)
+    returns (bytes32, string memory, string memory, string memory, address, uint256)
     {
-        return (schemaMap[id].id, schemaMap[id].credentialType, schemaMap[id].url, schemaMap[id].creator, schemaMap[id].timestamp);
+        return (schemaMap[id].id, schemaMap[id].credentialType, schemaMap[id].url, schemaMap[id].desc, schemaMap[id].creator, schemaMap[id].timestamp);
     }
 }
