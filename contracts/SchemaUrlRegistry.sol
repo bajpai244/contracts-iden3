@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.2;
+pragma solidity 0.6.0;
 
 /**
  * @title Schema
@@ -15,7 +15,7 @@ contract SchemaUrlRegistry {
         string desc;
     }
 
-    mapping(bytes32 => Schema) public schemaMap;
+    mapping(bytes32 => Schema) schemaMap;
     bytes32[] ids;
 
     /**
@@ -25,7 +25,7 @@ contract SchemaUrlRegistry {
      * @param url - schema uri
      */
     function save(bytes32 id, string memory credentialType, string memory url, string memory desc) public {
-        require(schemaMap[id].creator != address(0), "Schema already exists");
+        require(schemaMap[id].creator == address(0), "Schema already exists");
 
         Schema memory s = Schema({// creating new schema
         creator : msg.sender,
