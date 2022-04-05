@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.6.0;
+pragma solidity 0.8.0;
 
 /**
  * @title Schema
@@ -8,15 +8,15 @@ pragma solidity 0.6.0;
 contract SchemaUrlRegistry {
     struct Schema {
         address creator;
-        bytes32 id;
+        string id;
         string credentialType;
         string url;
         uint256 timestamp;
         string desc;
     }
 
-    mapping(bytes32 => Schema) schemaMap;
-    bytes32[] ids;
+    mapping(string => Schema) schemaMap;
+    string[] ids;
 
     /**
      * @dev save is function to store schema
@@ -24,7 +24,7 @@ contract SchemaUrlRegistry {
      * @param credentialType - schema credential type
      * @param url - schema uri
      */
-    function save(bytes32 id, string memory credentialType, string memory url, string memory desc) public {
+    function save(string memory id, string memory credentialType, string memory url, string memory desc) public {
         require(schemaMap[id].creator == address(0), "Schema already exists");
 
         Schema memory s = Schema({// creating new schema
@@ -40,7 +40,7 @@ contract SchemaUrlRegistry {
         ids.push(id);
     }
 
-    function getIds() public view returns(bytes32[] memory){
+    function getIds() public view returns(string[] memory){
         return ids;
     }
 
@@ -48,10 +48,10 @@ contract SchemaUrlRegistry {
      * @dev getSchemaById is function to retrieve ipfs utl by name
      * @param id - hash of the schema
     */
-    function getSchemaById(bytes32 id)
+    function getSchemaById(string memory id)
     public
     view
-    returns (bytes32, string memory, string memory, string memory, address, uint256)
+    returns (string memory, string memory, string memory, string memory, address, uint256)
     {
         return (schemaMap[id].id, schemaMap[id].credentialType, schemaMap[id].url, schemaMap[id].desc, schemaMap[id].creator, schemaMap[id].timestamp);
     }
